@@ -1,33 +1,40 @@
-function doGet(e)
-{
+function doPost(e) {
   Logger.log(JSON.stringify(e));
-  var params = e.parameters;
-  
+  var payload = JSON.parse(e.postData.contents);
+
+  var pageData = payload.pageData;
+  var reviewData = payload.reviewData;
+  var editData = payload.editData;
+  var photoData = payload.photoData;
+  var passcode = payload.passcode;
+  var version = payload.version;
+  var iOS = payload.iOS;
+  var comment = payload.comment;
+
   var d = new Date();
   var currentTime = d.toLocaleString();
-  
+
   var files = DriveApp.getFilesByName("bs");
-  if (files.hasNext())
-  {
+  if (files.hasNext()) {
     var file = files.next();
     var spreadsheet = SpreadsheetApp.open(file);
-    var sheet = spreadsheet.getSheetByName("1");
-    var lastRow = sheet.getLastRow();
-    
+    var sheet = spreadsheet.getSheetByName("new");
+
     var values = [
-      [params["imageUrl"][0],params["supportingImageUrl"][0],params["title"][0],params["description"][0],
-       params["statement"][0],params["streetAddress"][0],params["lat"][0],params["lng"][0],
-       params["stars"][0],params["duplicate"][0],params["reasons"][0],params["JSON"][0],
-       params["passcode"][0],params["x"][0],currentTime
-       ]
-      ];
-    
-    sheet.insertRowAfter(lastRow);
-    var range = sheet.getRange(lastRow+1, 1, 1, 15);
-    range.setValues(values);
+      pageData.type, pageData.id, pageData.imageUrl, pageData.supportingImageUrl,
+      pageData.title, pageData.description, pageData.statement, pageData.streetAddress,
+      pageData.lat, pageData.lng,
+
+      reviewData.quality, reviewData.description, reviewData.cultural, reviewData.uniqueness,
+      reviewData.safety, reviewData.location, reviewData.duplicateOf, reviewData.rejectReason,
+
+      comment, passcode, version, iOS,
+      currentTime, JSON.stringify(payload)
+    ];
+
+    sheet.appendRow(values);
   }
-  else
-  {
+  else {
     return;
   }
 }
